@@ -1,0 +1,51 @@
+version: '3.1'
+
+services:
+
+  wp:
+    image: wordpress
+    restart: always
+    ports:
+      - 80:80
+    environment:
+      WORDPRESS_DB_HOST: db
+      WORDPRESS_DB_USER: "${DB_USER}"
+      WORDPRESS_DB_PASSWORD: "${DB_ROOT_PASSWORD}"
+      WORDPRESS_DB_NAME: "${DB_NAME}"
+    volumes:
+      - ./wp-app:/var/www/html
+
+  db:
+    image: mariadb
+    restart: always
+    environment:
+      MYSQL_DATABASE: "${DB_NAME}"
+      MYSQL_USER: "${DB_USER}"
+      MYSQL_PASSWORD: ${DB_ROOT_PASSWORD}
+      MYSQL_RANDOM_ROOT_PASSWORD: '1'
+    volumes:
+      - db:/var/lib/mysql
+
+  wpcli:
+    image: wordpress:cli
+    volumes:
+        - ./wp-app:/var/www/html
+    depends_on:
+        - db
+        - wp     
+
+  pma:
+    image: phpmyadmin/phpmyadmin
+    environment:
+      # https://docs.phpmyadmin.net/en/latest/setup.html#docker-environment-variables
+      PMA_HOST: db
+      PMA_PORT: 3306
+      MYSQL_ROOT_PASSWORD: "${DB_ROOT_PASSWORD}"
+    ports:
+      - 8080:80
+    links:
+      - db:db        
+
+volumes:
+  wordpress:
+  db:
