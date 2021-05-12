@@ -47,5 +47,5 @@ services:
       - db:db        
 
 volumes:
-  wordpress:
+  wp:
   db:
